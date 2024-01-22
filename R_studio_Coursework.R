@@ -73,8 +73,8 @@ EarlyOverCount <- nrow(DepTimeEarlyOver)
 MidOverCount <- nrow(DepTimeMidOver)
 LateOverCount <- nrow(DepTimeLateOver)
 
-testing <- data.frame(value=c(EarlyMornCount,MidMornCount))
-print(testing)
+#testing <- data.frame(value=c(EarlyMornCount,MidMornCount))
+#print(testing)
 NoDelayCountDf <- data.frame(value<- c(EarlyMornCount, MidMornCount, LateMornCount, EarlyAftCount, MidAftCount, LateAftCount, EarlyEveCount, MidEveCount ,LateEveCount, EarlyOverCount, MidOverCount, LateOverCount),
                              categories<- c("Early Morn", "Mid Morn", "Late Morn", "Early Aft", "Mid Aft", "Late Aft", "Early Eve", "Mid Eve", "Late Eve", "Early Over", "Mid Over", "Late Over") )
 
@@ -82,7 +82,7 @@ print(NoDelayCountDf)
 #mysc<-
 my_sc<-ggplot(NoDelayCountDf, aes(x=categories, y=value, fill=categories)) + 
   geom_bar(stat = "identity")+
-  labs(title="Number of non delayed flights over a period of 24 hrs", x="period of the day", y="no. of flights")+
+  labs(title="Number of non delayed flights over a period of 24 hrs", x="period of the day", y="no. of flights with no delay")+
   theme(axis.text= element_text(size=11),
         plot.title= element_text(size=18),
         axis.title=element_text(size=17))+
@@ -101,23 +101,111 @@ my_sc
 
 #======== Q Best day of the week to fly ======== 
 
+# ======== getting flights that have less than 5 mins delay visa DBI (Q Best time of the day to fly)========
+Mon <- dbGetQuery(conn, 
+                               "SELECT DayOfWeek AS DayOfWeek FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DayOfWeek='1' ")
+Tues <- dbGetQuery(conn, 
+                  "SELECT DayOfWeek AS DayOfWeek FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DayOfWeek='2' ")
+Wed <- dbGetQuery(conn, 
+                      "SELECT DayOfWeek AS DayOfWeek FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DayOfWeek='3' ")
+Thurs <- dbGetQuery(conn, 
+                  "SELECT DayOfWeek AS DayOfWeek FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DayOfWeek='4' ")
+Fri<- dbGetQuery(conn, 
+                  "SELECT DayOfWeek AS DayOfWeek FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DayOfWeek='5' ")
+Sat <- dbGetQuery(conn, 
+                  "SELECT DayOfWeek AS DayOfWeek FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DayOfWeek='6' ")
+Sun<- dbGetQuery(conn, 
+                  "SELECT DayOfWeek AS DayOfWeek FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DayOfWeek='7' ")
+
+MonCount <-nrow(Mon)
+TuesCount <-nrow(Tues)
+WedCount <- nrow(Wed)
+ThursCount <- nrow(Thurs)
+FriCount <- nrow(Fri)
+SatCount <- nrow(Sat)
+SunCount <- nrow(Sun)
+print(MonCount)
+#======== Plotting the graph for best day of the week to fly ======== 
+
+NoDelayWeekCountDf <- data.frame(value2<- c(MonCount, TuesCount, WedCount, ThursCount, FriCount, SatCount, SunCount),
+                             categories2<- c("Mon" ,"Tues", "Wed", "Thurs", "Fri", "Sat", "Sun") )
+
+print(NoDelayWeekCountDf)
+
+my_sc2<-ggplot(NoDelayWeekCountDf, aes(x=factor(categories2, level=categories2), y=value2, fill=categories2)) + 
+  geom_bar(stat = "identity")+
+  labs(title="Number of non delayed flights over a period of a week", x="day of the week", y="no. of flights with no delay")+
+  theme(axis.text= element_text(size=11),
+        plot.title= element_text(size=18),
+        axis.title=element_text(size=17))+
+  geom_col()+
+  geom_text(aes(label = value2), color="black", size=4, hjust=5)+
+  coord_flip()
+
+my_sc2 
 
 
 
 
 
+#======== Q Best time of the year to fly ======== 
+Jan <- dbGetQuery(conn, 
+                 " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='1' ")
+Feb <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='2' ")
+March <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='3' ")
+Apr <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='4' ")
+May <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='5' ")
+June <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='6' ")
+July <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='7' ")
+Aug <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='8' ")
+Sep <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='9' ")
+Oct <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='10' ")
+Nov <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='11' ")
+Dec <- dbGetQuery(conn, 
+                  " SELECT Month AS Month FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND month ='12' ")
 
 
+CountJan <-nrow(Jan )
+CountFeb <- nrow(Feb)
+CountMarch <- nrow(March)
+CountApr <- nrow(Apr)
+CountMay <- nrow(May)
+CountJune <- nrow(June)
+CountJuly <- nrow(July)
+CountAug <- nrow(Aug)
+CountSep <- nrow(Sep)
+CountOct <- nrow(Oct)
+CountNov <- nrow(Nov)
+CountDec <- nrow(Dec)
 
 
+#======== Plotting the graph for best time of the year to travel ======== 
 
+NoDelayWeekCountDf <- data.frame(value3<- c(CountJan, CountFeb, CountMarch, CountApr, CountMay, CountJune, CountJuly, CountAug,
+                                            CountSep, CountOct, CountNov, CountDec),
+                                 categories3<- c("Jan" ,"Feb", "March", "April", "May", "June", "July",
+                                                 "Aug", "Sep", "Oct", "Nov", "Dec") )
 
+print(NoDelayWeekCountDf)
 
+my_sc3<-ggplot(NoDelayWeekCountDf, aes(x=factor(categories3, level=categories3), y=value3, fill=categories3)) + 
+  geom_bar(stat = "identity")+
+  labs(title="Number of non delayed flights over a period of a week", x="day of the week", y="no. of flights with no delay")+
+  theme(axis.text= element_text(size=11),
+        plot.title= element_text(size=18),
+        axis.title=element_text(size=17))+
+  geom_col()+
+  geom_text(aes(label = value3), color="black", size=4, hjust=5)+
+  coord_flip()
 
-
-
-
-
-
-
-
+my_sc3 
