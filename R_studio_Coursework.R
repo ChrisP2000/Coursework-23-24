@@ -209,3 +209,12 @@ my_sc3<-ggplot(NoDelayWeekCountDf, aes(x=factor(categories3, level=categories3),
   coord_flip()
 
 my_sc3 
+
+
+
+
+
+
+
+
+
