@@ -33,31 +33,31 @@ for(i in c(1991:2000)) {
 
 
 
-# ======== getting flights that have less than 5 mins delay visa DBI (Q Best time of the day to fly)========
+# ======== getting flights that have less than 15 mins delay visa DBI (Q Best time of the day to fly)========
 DepTimeEarlyMorn <- dbGetQuery(conn, 
-                 "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='600' AND DepTime <= '800' ")
+                 "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='600' AND DepTime <= '800' ")
 DepTimeMidMorn <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='800' AND DepTime <= '1000' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='800' AND DepTime <= '1000' ")
 DepTimelateMorn <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='1000' AND DepTime <= '1200' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='1000' AND DepTime <= '1200' ")
 DepTimeEarlyAft <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='1200' AND DepTime <= '1400' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='1200' AND DepTime <= '1400' ")
 DepTimeMidAft <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='1400' AND DepTime <= '1600' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='1400' AND DepTime <= '1600' ")
 DepTimeLateAft <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='1600' AND DepTime <= '1800' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='1600' AND DepTime <= '1800' ")
 DepTimeEarlyEve <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='1800' AND DepTime <= '2000' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='1800' AND DepTime <= '2000' ")
 DepTimeMidEve <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='2000' AND DepTime <= '2200' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='2000' AND DepTime <= '2200' ")
 DepTimeLateEve <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='2200' AND DepTime <= '2359' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='2200' AND DepTime <= '2359' ")
 DepTimeEarlyOver <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='1' AND DepTime <= '200' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='1' AND DepTime <= '200' ")
 DepTimeMidOver <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='200' AND DepTime <= '400' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='200' AND DepTime <= '400' ")
 DepTimeLateOver <- dbGetQuery(conn, 
-                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '5' AND DepDelay < '5' AND DepTime >='400' AND DepTime <= '600' ")
+                               "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='400' AND DepTime <= '600' ")
 print(DepTimeEarlyMorn)
 
 EarlyMornCount <-nrow(DepTimeEarlyMorn )
@@ -212,9 +212,32 @@ my_sc3
 
 
 
+##======== Plotting the graph for do older planes suffer on year to year basis ======== 
+dateOfPlane <- dbGetQuery(conn, 
+                          "
+    SELECT CAST(planes.year AS INTEGER) AS year, CAST(2024 - planes.year AS INTEGER) AS age_of_plane,
+           AVG(CAST(ontime.ArrDelay AS INTEGER)) AS avg_arr_delay,
+           AVG(CAST(ontime.DepDelay AS INTEGER)) AS avg_dep_delay
+    FROM planes
+    JOIN ontime ON planes.TailNum = ontime.TailNum
+    WHERE CAST(ontime.ArrDelay AS INTEGER) < 15 AND CAST(ontime.DepDelay AS INTEGER) < 15
+          AND planes.year IS NOT NULL
+    GROUP BY planes.year
+")
 
 
+#data <- dbGetQuery(conn, dateOfPlane )
 
+# Create lists to store years, age of the plane, and average delay
+years <- dateOfPlane$year
+age_of_plane <- 2024 - dateOfPlane$year
+avg_delay <- (dateOfPlane$avg_arr_delay + dateOfPlane$avg_dep_delay) / 2
 
+# Plot the graph
+plot(age_of_plane, avg_delay, type = "o", col = "skyblue", pch = 16, 
+     xlab = "Age of the Plane", ylab = "Average Delay (minutes)",
+     main = "Average Delay vs. Age of the Plane")
 
+# Add grid
+grid()
 
