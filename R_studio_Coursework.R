@@ -190,54 +190,61 @@ CountDec <- nrow(Dec)
 
 
 #======== Plotting the graph for best time of the year to travel ======== 
+custom_colors <- c("Jan" = "skyblue", "Feb" = "lightgreen", "March" = "orange",
+                   "April" = "pink", "May" = "lightblue", "June" = "yellow",
+                   "July" = "lightcoral", "Aug" = "lightskyblue", "Sep" = "lightgreen",
+                   "Oct" = "lightpink", "Nov" = "lightgray", "Dec" = "lightyellow")
 
-NoDelayWeekCountDf <- data.frame(value3<- c(CountJan, CountFeb, CountMarch, CountApr, CountMay, CountJune, CountJuly, CountAug,
-                                            CountSep, CountOct, CountNov, CountDec),
-                                 categories3<- c("Jan" ,"Feb", "March", "April", "May", "June", "July",
-                                                 "Aug", "Sep", "Oct", "Nov", "Dec") )
-
-print(NoDelayWeekCountDf)
-
-my_sc3<-ggplot(NoDelayWeekCountDf, aes(x=factor(categories3, level=categories3), y=value3, fill=categories3)) + 
-  geom_bar(stat = "identity")+
-  labs(title="Number of non delayed flights over a period of a week", x="day of the week", y="no. of flights with no delay")+
-  theme(axis.text= element_text(size=11),
-        plot.title= element_text(size=18),
-        axis.title=element_text(size=17))+
-  geom_col()+
-  geom_text(aes(label = value3), color="black", size=4, hjust=5)+
+my_sc3 <- ggplot(NoDelayWeekCountDf, aes(x = factor(categories3, level = categories3), y = value3, fill = categories3)) + 
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Non-Delayed Flights Over a Period of a Week", x = "Day of the Week", y = "Number of Flights with No Delay") +
+  theme(axis.text = element_text(size = 11, family = "serif"),
+        plot.title = element_text(size = 18, family = "serif"),
+        axis.title = element_text(size = 17, family = "serif")) +
+  geom_col() +
+  geom_text(aes(label = value3), color = "black", size = 4, hjust = 5) +
+  scale_fill_manual(values = custom_colors) +  # Set custom colors
   coord_flip()
 
-my_sc3 
-
-
+my_sc3
 
 ##======== Plotting the graph for do older planes suffer on year to year basis ======== 
-dateOfPlane <- dbGetQuery(conn, 
-                          "
-    SELECT CAST(planes.year AS INTEGER) AS year, CAST(2024 - planes.year AS INTEGER) AS age_of_plane,
-           AVG(CAST(ontime.ArrDelay AS INTEGER)) AS avg_arr_delay,
-           AVG(CAST(ontime.DepDelay AS INTEGER)) AS avg_dep_delay
-    FROM planes
-    JOIN ontime ON planes.TailNum = ontime.TailNum
-    WHERE CAST(ontime.ArrDelay AS INTEGER) < 15 AND CAST(ontime.DepDelay AS INTEGER) < 15
-          AND planes.year IS NOT NULL
-    GROUP BY planes.year
-")
+query <- " SELECT CAST(ontime.TailNum AS INTEGER) AS TailNum
+          FROM ontime
+          WHERE ontime.ArrDelay < 15
+"
+result <- dbGetQuery(conn, query)
+print(result)
+
+print(ontime)
+datesOfPlane <- as.data.frame(result)
+datesOfPlane$Year <- as.integer(ifelse(is.na(datesOfPlane$Year), NA, 
+                                       ifelse(grepl("^\\d+$", datesOfPlane$Year), 
+                                              2024 - as.integer(datesOfPlane$Year), 
+                                              NA)))
 
 
-#data <- dbGetQuery(conn, dateOfPlane )
 
-# Create lists to store years, age of the plane, and average delay
-years <- dateOfPlane$year
-age_of_plane <- 2024 - dateOfPlane$year
-avg_delay <- (dateOfPlane$avg_arr_delay + dateOfPlane$avg_dep_delay) / 2
+#SELECT CAST(planes.year AS INTEGER) AS year
+#FROM planes
+#JOIN ontime ON planes.tailnum = ontime.TailNum
+#WHERE CAST(ontime.ArrDelay AS INTEGER) < 15
+#AND CAST(ontime.DepDelay AS INTEGER) < 15
+#AND planes.year IS NOT NULL
+# Group by year and count the occurrences
+delay_counts <- datesOfPlane %>% 
+  filter(!is.na(Year)) %>% 
+  group_by(Year) %>%
+  summarise(Count = n())
 
 # Plot the graph
-plot(age_of_plane, avg_delay, type = "o", col = "skyblue", pch = 16, 
-     xlab = "Age of the Plane", ylab = "Average Delay (minutes)",
-     main = "Average Delay vs. Age of the Plane")
-
-# Add grid
-grid()
-
+ggplot(delay_counts, aes(x = Year, y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = 'Number of No Delays per Year',
+       x = 'Age of the Plane',
+       y = 'Number of No Delays') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  xlim(10, 70) +
+  theme(axis.title = element_text(size = 13, family = 'serif'),
+        axis.text = element_text(size = 10, family = 'serif'))
