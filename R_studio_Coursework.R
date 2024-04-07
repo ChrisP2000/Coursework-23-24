@@ -31,8 +31,6 @@ for(i in c(1991:2000)) {
   }
 }
 
-
-
 # ======== getting flights that have less than 15 mins delay visa DBI (Q Best time of the day to fly)========
 DepTimeEarlyMorn <- dbGetQuery(conn, 
                  "SELECT DepTime AS DepTime FROM ontime WHERE ArrDelay < '15' AND DepDelay < '15' AND DepTime >='600' AND DepTime <= '800' ")
